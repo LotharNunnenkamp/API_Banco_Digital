@@ -71,10 +71,8 @@ const atualizarDadosUsuario = (req, res) => {
         const existeCpf = validarCpf(cpf);
         const existeEmail = validarEmail(email);
 
-        if (contaUsuario.numero !== existeCpf.numero || contaUsuario.numero !== existeEmail.numero) {
-            if (existeCpf || existeEmail) {
-                return res.status(409).json({ mensagem: "Já existe uma conta com o cpf ou e-mail informado!" })
-            }
+        if (existeCpf || existeEmail) {
+            return res.status(409).json({ mensagem: "Já existe uma conta com o cpf ou e-mail informado!" })
         }
 
         contaUsuario.usuario = {
@@ -100,12 +98,18 @@ const excluirContaBancaria = (req, res) => {
         }
 
         if (contaUsuario.saldo !== 0) {
-            return res.status().json({ mensagem: "A conta só pode ser removida se o saldo for zero!" })
+            return res.status(400).json({ mensagem: "A conta só pode ser removida se o saldo for zero!" })
         }
 
         const contasAtualizadas = contas.filter((conta) => {
             return conta.numero !== Number(numeroConta);
         })
+
+        if (contasAtualizadas.length === contas.length) {
+            return res.status(404).json({
+                mensagem: "A conta não pôde ser excluída.",
+            });
+        }
 
         contas = contasAtualizadas;
 
